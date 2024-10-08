@@ -73,7 +73,7 @@ process_app_backseries_0516 <- function(app_names, pop_name) {
     app_names, function(file) {
       metric <- str_extract(file, c('starts','achievements'))[!is.na(str_extract(file, c('starts','achievements')))]
       tempdf <-
-        read_csv(paste0('data\\raw-data\\2_2_6-apprenticeships\\',file)) %>%
+        read_csv(paste0('data/raw-data/2_2_6-apprenticeships/',file)) %>%
         pivot_longer(!Region, names_to='year', values_to=metric) %>%
         rename(
           'region_name'='Region',
@@ -87,7 +87,7 @@ process_app_backseries_0516 <- function(app_names, pop_name) {
 #   
   # Load, clean and reshape population data
   df_pop <-
-    read_excel(paste0('data\\raw-data\\2_2_6-apprenticeships\\',pop_name), skip=6) %>%
+    read_excel(paste0('data/raw-data/2_2_6-apprenticeships/',pop_name), skip=6) %>%
     drop_na() %>%
     select(-c(`Wales`, `Scotland`, `Northern Ireland`)) %>%
     pivot_longer(!Date, names_to='region_name', values_to='population') %>%
