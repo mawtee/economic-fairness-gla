@@ -7,22 +7,29 @@
 library(tidyverse)
 library(readxl)
 library(rvest)
-#' [Source Paths]
 source('scripts/helpers.R')
-source('scripts/processing/2_2_6-apprenticeships/process-apprenticeships-backseries.R')
+source('scripts/processing/2_2_6-apprenticeships/process-apprenticeships-backseries.R') # add this within if condition so that only plays where reprocess = T
 #source('scripts/processing/2_2_6-apprenticeships/process-apprenticeships.R')
 #'[Global Options]
-#' Backseries inputs
+#' Backseries inputs 
+#' Note. Unless you have a clear reason to update the back series, skip this step,* (`PROCESS_BACKSERIES <- F`)
 REPROCESS_BACKSERIES <- TRUE
 if (REPROCESS_BACKSERIES==TRUE) {
   BACKSERIES__APP_0516_NAMES <- c('z-2_2_6-backseries-starts-0516.csv', 'z-2_2_6-backseries-achievements-0516.csv')
   BACKSERIES__POP_0516_NAME <- 'z-population-data-la-nomis-0516.xlsx'
-  BACKSERIES__CURR_YEAR <- as.numeric(format(Sys.time(),"%Y"))-1  
+  BACKSERIES__CURR_YEAR <- as.numeric(format(Sys.time(),"%Y")) -1
   BACKSERIES__17toCURR_DIRS <- list.dirs(paste0('data/raw-data/2_2_6-apprenticeships'), recursive=F)
   BACKSERIES__PROCESSED_PATH <- paste0('data/processed-data/2_2_6-apprenticeships/',BACKSERIES__CURR_YEAR-1,'_',substr(BACKSERIES__CURR_YEAR ,3,4))
   BACKSERIES__PROCESSED_SUFFIX <- '' 
 }
-
+#' Update series inputs
+UPDATE_SERIES <- TRUE
+  if (UPDATE_SERIES==T) {
+    UPDATE__URL <- 'https://explore-education-statistics.service.gov.uk/find-statistics/apprenticeships'
+    UPDATE__YEAR <- as.numeric(format(Sys.time(),"%Y"))
+    UPDATE__RELEASE_YEAR <- paste0(UPDATE__YEAR-1,'_', substr(UPDATE__YEAR, 3,4))
+    UPDATE__RAW_PATH <- paste0("data/raw-data/2_2_6-apprenticeships/batch-",UPDATE__RELEASE_YEAR)
+}
 
 # grepl('geography-population', paste0(BACKSERIES__RAW_FOLDER, '\\data\\', list.files(paste0(BACKSERIES__RAW_FOLDER, '\\data'))))
 # # RAW_PATH <- paste0('raw-data/2_2_6-apprenticeships/batch-datyr',DATA_RELEASE,'-pubyr',PUBLICATION_YEAR)
@@ -56,8 +63,10 @@ if (REPROCESS_BACKSERIES==TRUE) {
 
 #'* Unless you have a clear reason to update the back series, skip this step,* (`PROCESS_BACKSERIES <- F`)
 #'* Even if you do have a good reason, it is recommended that you do define global* `BACKSERIES__PROCESSED_SUFFIX` *with some string*
-#'* In this way, you will not overwrite existing backseries!*
-#'
+#'* In this way, you will not overwrite existing backseries. *
+#'* Additionally, reprocessing procedure will break if you execute it AFTER scraping and writing latest data via scrape_and_write_app_data() *
+#'* In the above scenario, remove the*`-1`* condition from global*`BACKSERIES__CURR_YEAR`* and then reprocessing will run successfully, with the latest data included*
+
 if (REPROCESS_BACKSERIES==T) {
   
   
@@ -70,13 +79,29 @@ if (REPROCESS_BACKSERIES==T) {
   # Append into single series 
   df_backseries <- bind_rows(df_0516, df_17toCURR)
   
-  # Save if series has no gaps
+  # Save if series has no gaps (and user provides permission)
   if (length(unique(df_backseries$time_period))*length(unique(df_backseries$region_name)) == nrow(df_backseries)) {
-    cat(
-      'Series has no gaps, and all additional QA checks have been satisfied.\n
-       Writing backseries to file.'
+    print('Series has no gaps, and all additional QA checks have been satisfied.')
+    user_confirm <- readline(
+      "Are you sure you want to write reprocssed data to file?\n
+       It is recommended that you define BACKSERIES__PROCESSED_SUFFIX so as not to overwrite existing backseries until you have checked that everything is in order.\n
+      (y/n)"
     )
-    write_csv(df_backseries, paste0(BACKSERIES__PROCESSED_PATH, '/2_2_6-processed',BACKSERIES__PROCESSED_SUFFIX,'.csv'))
+    if (user_confirm=='y') {
+      print('Writing backseries to file.')
+      if (dir.exists(BACKSERIES__PROCESSED_PATH)) {
+        write_csv(df_backseries, paste0(BACKSERIES__PROCESSED_PATH, '/2_2_6-processed',BACKSERIES__PROCESSED_SUFFIX,'.csv'))
+      }
+      else {
+        dir.create(BACKSERIES__PROCESSED_PATH)
+        write_csv(df_backseries, paste0(BACKSERIES__PROCESSED_PATH, '/2_2_6-processed',BACKSERIES__PROCESSED_SUFFIX,'.csv'))
+      }
+    }
+    else {
+      stop(
+        'Aborting reprocessing procedure: user does does not want to write reprocessed data to file'
+      )
+    }
   }
   else {
     stop(
@@ -92,6 +117,37 @@ if (REPROCESS_BACKSERIES==T) {
 
 # 1. Update series with latest data
 #===============================================================================
+
+
+scrape_and_write_app_data(UPDATE__URL, UPDATE__RELEASE_YEAR)
+df_update <- load_and_clean_raw_app_data(
+  paste0(UPDATE__RAW_PATH, '/data/', list.files(paste0(UPDATE__RAW_PATH, '/data'))[grepl('geography-population', list.files(paste0(UPDATE__RAW_PATH, '/data')))]), UPDATE__YEAR
+)
+add_update_to_backseries <- function() {
+  # Load backseries (2022/23)
+
+  # Append update to backseries
+  bind_rows()
+
+  # Loop through each value of time_period and keep most recent record of time_period 
+  # Note. This results in the elimination of duplicates
+  df_clean_list <- lapply(
+    sort(unique(df$time_period)), function(y) {
+      last_occurence <- max(df$data_year[which(df$time_period==y)])
+      df_year <- df %>% filter(time_period==y & data_year==last_occurence)
+      return(df_year)
+  }
+)
+  # Append into dataframe
+  df_clean <- bind_rows(df_clean_list)
+  
+}
+
+# Write to processed path
+df_series_update <- write_csv()
+
+
+# Indicators to dataWrapper
 
 
 

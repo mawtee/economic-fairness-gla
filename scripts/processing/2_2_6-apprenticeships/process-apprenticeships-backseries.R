@@ -1,4 +1,4 @@
-#'[Script]#'*process_apprenticeships-backseries.R*
+#'[Script]#'*process_apprenticeships_backseries.R*
 #'[Project]#'*economic_fairness_gla (https://github.com/mawtee/economic-fairness-gla)*
 #'[Author]#'*M. Tibbles*
 #'[Last Update]#'*08/10/2024*
@@ -105,12 +105,16 @@ process_app_backseries_0516 <- function(app_names, pop_name) {
 
 }
 
+# Process backseries data (2017/18-Current)
+#===============================================================================
 process_app_backseries_17toCURR <- function(dirs, curr_year) {
   
   #' @description 
   #' Processes back series data from 2017 to current year.
   #' 
-  #' @details  relies on function load_and_clean_raw_app_data
+  #' @details  relies on function load_and_clean_raw_app_data, functionis is designed to be run prior to download of latest data. 
+  #' For example, reprocessing up to 2022/23 breaks if I execute procedure when 2023 data is already downloaded.
+  #' If you do want to to do this then remove -1 from definiton of curr_year global 
   #'
   #' @param dirs Character vector of paths to backseries data. Defined in global `BACKSERIES__17toCURR_DIRS`
   #' @param curr_year Numeric value of current year. Defined in global `BACKSERIES__CURR_YEAR`
@@ -175,4 +179,48 @@ process_app_backseries_17toCURR <- function(dirs, curr_year) {
 }
 
 
+# 
+scrape_and_write_app_data <- function(url, release_year) {
+
+  #' @description 
+  #' Scrapes latest Apprenticeships data from DFE site and writes to file
+  #' 
+  #' @details  
+  #' 
+  #' @param url String URL to DFE Apprenticeships data page. Defined in global `UPDATE__URL`
+  #' @param release_year String data release year (e.g. 2022_23). Defined in global `UPDATE__RELEASE`
+  #'
+  #' @noRd
+  
+  
+  # Load HTML page
+  page <- rvest::read_html(url)
+  # Scrape link to data download
+  link <- page %>%
+    html_nodes("a") %>%               # find all links
+    html_attr("href") %>%             # find all urls
+    str_subset("api/releases") %>%    # find the api download link
+    .[[1]]  
+  # Download and unzip
+  temp <- tempfile()
+  download.file(url=link, temp, mode = "wb")
+  if (dir.exists(paste0('data/raw-data/2_2_6-apprenticeships/batch-', release_year))) {
+    user_confirm <- readline("Directory for data update already exists. Are you sure you want to overwrite the existing directory? (y/n)")
+    if (user_confirm=='y') {
+      unzip(zipfile=temp, exdir=paste0('data/raw-data/2_2_6-apprenticeships/batch-', release_year), overwrite=TRUE)
+      unlink(temp)
+    }
+    else {
+      stop(
+        'Aborting update: user does does not want to overwrite existing directory'
+      )
+    }
+  }
+  else {
+    unzip(zipfile=temp, exdir=paste0('data/raw-data/2_2_6-apprenticeships/batch-', release_year), overwrite=TRUE)
+    unlink(temp)
+  }
+  
+  
+}
 
