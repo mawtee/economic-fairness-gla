@@ -7,14 +7,16 @@
 library(tidyverse)
 library(readxl)
 library(rvest)
+#'[Source Paths]
 source('scripts/helpers.R')
-source('scripts/processing/2_2_6-apprenticeships/process-apprenticeships-backseries.R') # add this within if condition so that only plays where reprocess = T
+source('scripts/processing/2_2_6-apprenticeships/process-apprenticeships.R') # add this within if condition so that only plays where reprocess = T
 #source('scripts/processing/2_2_6-apprenticeships/process-apprenticeships.R')
 #'[Global Options]
 #' Backseries inputs 
 #' Note. Unless you have a clear reason to update the back series, skip this step,* (`PROCESS_BACKSERIES <- F`)
-REPROCESS_BACKSERIES <- TRUE
+REPROCESS_BACKSERIES <- F
 if (REPROCESS_BACKSERIES==TRUE) {
+  source('scripts/processing/2_2_6-apprenticeships/process-apprenticeships-backseries.R')
   BACKSERIES__APP_0516_NAMES <- c('z-2_2_6-backseries-starts-0516.csv', 'z-2_2_6-backseries-achievements-0516.csv')
   BACKSERIES__POP_0516_NAME <- 'z-population-data-la-nomis-0516.xlsx'
   BACKSERIES__CURR_YEAR <- as.numeric(format(Sys.time(),"%Y")) -1
@@ -28,7 +30,11 @@ UPDATE_SERIES <- TRUE
     UPDATE__URL <- 'https://explore-education-statistics.service.gov.uk/find-statistics/apprenticeships'
     UPDATE__YEAR <- as.numeric(format(Sys.time(),"%Y"))
     UPDATE__RELEASE_YEAR <- paste0(UPDATE__YEAR-1,'_', substr(UPDATE__YEAR, 3,4))
-    UPDATE__RAW_PATH <- paste0("data/raw-data/2_2_6-apprenticeships/batch-",UPDATE__RELEASE_YEAR)
+    UPDATE__CURR_RELEASE_YEAR <- paste0(UPDATE__YEAR-2,'_', substr(UPDATE__YEAR-1, 3,4))
+    UPDATE__RAW_PATH <- "data/raw-data/2_2_6-apprenticeships"
+    UPDATE__PROCESSED_PATH <- "data/processed-data/2_2_6-apprenticeships"
+    UPDATE__SERIES_PATH <- paste0(UPDATE__PROCESSED_PATH,'/', UPDATE__RELEASE_YEAR)
+    #UPDATE__BACKSERIES_PATH <- paste0("data/processed-data/2_2_6-apprenticeships/",UPDATE__YEAR-2,'_', substr(UPDATE__YEAR-1, 3,4), '/2_2_6-processed.csv')
 }
 
 # grepl('geography-population', paste0(BACKSERIES__RAW_FOLDER, '\\data\\', list.files(paste0(BACKSERIES__RAW_FOLDER, '\\data'))))
@@ -106,8 +112,7 @@ if (REPROCESS_BACKSERIES==T) {
   else {
     stop(
       'Series contains gaps.\n
-      Investigate source of series gaps/break before continuing, noting that one possibility is genuine gaps in the most recent data.\n
-      There should not, however, be gaps up to and including 2022/23' 
+      Investigate source of series gaps/break before continuing, noting that one possibility is genuine gaps in the most recent data.\n'
     )
   }
   
@@ -119,42 +124,70 @@ if (REPROCESS_BACKSERIES==T) {
 #===============================================================================
 
 
+# Scrape and save latest data
 scrape_and_write_app_data(UPDATE__URL, UPDATE__RELEASE_YEAR)
-df_update <- load_and_clean_raw_app_data(
-  paste0(UPDATE__RAW_PATH, '/data/', list.files(paste0(UPDATE__RAW_PATH, '/data'))[grepl('geography-population', list.files(paste0(UPDATE__RAW_PATH, '/data')))]), UPDATE__YEAR
-)
-add_update_to_backseries <- function() {
-  # Load backseries (2022/23)
 
-  # Append update to backseries
-  bind_rows()
+# Process/clean latest data
+df_update <- load_and_clean_raw_app_data(paste0(UPDATE__RAW_PATH,'/', UPDATE__RELEASE_YEAR), UPDATE__YEAR)
 
-  # Loop through each value of time_period and keep most recent record of time_period 
-  # Note. This results in the elimination of duplicates
-  df_clean_list <- lapply(
-    sort(unique(df$time_period)), function(y) {
-      last_occurence <- max(df$data_year[which(df$time_period==y)])
-      df_year <- df %>% filter(time_period==y & data_year==last_occurence)
-      return(df_year)
+# Add latest data to existing series (and overwrite series where applicable)
+df_update_series <- add_update_to_series(paste0(UPDATE__PROCESSED_PATH,'/', UPDATE__CURR_RELEASE_YEAR), df_update)
+
+# QA report of series provenance
+for (period in sort(unique(df_update_series$time_period))) {
+  if (period == sort(unique(df_update_series$time_period))[1]) {
+    cat('Use the following output to conduct a review of the update process.\n
+      A successul update should result in the last 6 years using data from the update year (',UPDATE__YEAR,')\n
+      Divergence from this standard may mean that DfE publication has been amended to include a longer or shorter time series\n
+      This program should be able to deal with such change, but nevertheless a thorough QA check is advisabled in the above scenario.\n
+      Finally, the QA output for 2016/17 and before is largely meaningless; what matters is the data provenance from 2017/18 onward.\n')
   }
-)
-  # Append into dataframe
-  df_clean <- bind_rows(df_clean_list)
+  data_year <- unique(df_update_series$data_year[df_update_series$time_period==period])
+  print(paste0('  Data for time period ',period,' is from the data year ', data_year))
   
 }
-
-# Write to processed path
-df_series_update <- write_csv()
-
-
-# Indicators to dataWrapper
-
+user_confirm <- readline('Confirm that you are satisfied with the data provenance of the full series.(y/n)')
+# Proceed to writing new series to file
+if (user_confirm=='y') {
+  if (length(unique(df_update_series$time_period))*length(unique(df_update_series$region_name)) == nrow(df_update_series)) {
+    cat(
+      'Series has no gaps, and all additional QA checks have been satisfied.\n
+      Creating new directory and writing updated series to file'
+    )
+    if (!dir.exists(UPDATE__SERIES_PATH)) {
+      dir.create(UPDATE__SERIES_PATH)
+    }
+    write_csv(df_update_series, paste0(UPDATE__SERIES_PATH,'/2_2_6-processed.csv'))
+  }
+  else {
+    stop(
+      'Series contains gaps.\n
+      Investigate source of series gaps/break before continuing, noting that one possibility is genuine gaps in the most recent data.\n'
+    )
+  }
+}
+if (user_confirm=='n') {
+  stop(
+    'Aborting update procedure: You have confirmed that you are satisfied with the data provenance of the series. A thorough QA check is advised! '
+  )
+}
 
 
 
 # 2. Push updates to chart
 #===============================================================================
   
+
+
+
+
+
+
+
+
+
+
+
 
 # Fix 01516
 

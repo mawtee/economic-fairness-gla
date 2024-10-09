@@ -5,45 +5,6 @@
 #'[Description]#'*Defines all processing functions used for indicator 2_2_6-apprenticeships*
 #'[____________________________________________________________________________]
 
-
-# Load and clean raw apprenticeships data
-#===============================================================================
-load_and_clean_raw_app_data <- function(path, data_year) {
-  
-  #' @description 
-  #' Processes raw apprenticeships data downloaded from DfE.
-  #' 
-  #' @details 
-  #' Raw apprenticeships data is loaded; columns renamed; regional filter applied and redundant variable dropped
-  #'
-  #' @param path description
-  #' @param data_year description
-  #'
-  #' @return `df_app_processed` Cleaned dataframe
-  #' 
-  #' @noRd
-  
-  df_app_processed <- read_csv(path) %>%
-    rename_with(~str_extract(.x, 'population'), matches('population_')) %>%
-    rename_with(~str_extract(.x, 'age'), matches('age_')) %>%
-    rename_with(~gsub('apps', 'app', .x), matches('apps')) %>%
-    filter(
-      app_level=='Total',
-      age=='Total',
-      geographic_level=='Regional',
-      !str_detect(region_name, 'Outside')
-    ) %>%
-    mutate(
-      `data_year` = data_year,
-      time_period = paste(substr(as.character(time_period), 1,4), substr(as.character(time_period), 5,6), sep="/"),
-      population = as.numeric(as.character(population))
-    ) %>%
-    select(time_period, data_year, region_name, population, starts, achievements, starts_rate_per_100000_population,  achievements_rate_per_100000_population) %>%
-    mutate(across(c(starts, achievements, contains('rate')), ~as.numeric(as.character(.x))))
-  return(df_app_processed) 
-}
-
-
 # Process backseries data (2005/06-2016/17)
 #===============================================================================
 
@@ -129,9 +90,9 @@ process_app_backseries_17toCURR <- function(dirs, curr_year) {
     # Loop through backseries directories and read in (and process) geography-population table via process_raw_app_data()
     df_list  <- lapply(
       dirs, function(dir) {
-        path <- paste0(dir, '/data/', list.files(paste0(dir, '/data'))[grepl('geography-population', list.files(paste0(dir, '/data')))])
+        raw_path <- paste0(dir, '/data/', list.files(paste0(dir, '/data'))[grepl('geography-population', list.files(paste0(dir, '/data')))])
         data_year <- as.numeric(paste0('20',str_sub(dir,-2,-1)))
-        year_df <- load_and_clean_raw_app_data(path, data_year)
+        year_df <- load_and_clean_raw_app_data(raw_path, data_year)
         return(year_df)
       }
     )
@@ -179,48 +140,5 @@ process_app_backseries_17toCURR <- function(dirs, curr_year) {
 }
 
 
-# 
-scrape_and_write_app_data <- function(url, release_year) {
 
-  #' @description 
-  #' Scrapes latest Apprenticeships data from DFE site and writes to file
-  #' 
-  #' @details  
-  #' 
-  #' @param url String URL to DFE Apprenticeships data page. Defined in global `UPDATE__URL`
-  #' @param release_year String data release year (e.g. 2022_23). Defined in global `UPDATE__RELEASE`
-  #'
-  #' @noRd
-  
-  
-  # Load HTML page
-  page <- rvest::read_html(url)
-  # Scrape link to data download
-  link <- page %>%
-    html_nodes("a") %>%               # find all links
-    html_attr("href") %>%             # find all urls
-    str_subset("api/releases") %>%    # find the api download link
-    .[[1]]  
-  # Download and unzip
-  temp <- tempfile()
-  download.file(url=link, temp, mode = "wb")
-  if (dir.exists(paste0('data/raw-data/2_2_6-apprenticeships/batch-', release_year))) {
-    user_confirm <- readline("Directory for data update already exists. Are you sure you want to overwrite the existing directory? (y/n)")
-    if (user_confirm=='y') {
-      unzip(zipfile=temp, exdir=paste0('data/raw-data/2_2_6-apprenticeships/batch-', release_year), overwrite=TRUE)
-      unlink(temp)
-    }
-    else {
-      stop(
-        'Aborting update: user does does not want to overwrite existing directory'
-      )
-    }
-  }
-  else {
-    unzip(zipfile=temp, exdir=paste0('data/raw-data/2_2_6-apprenticeships/batch-', release_year), overwrite=TRUE)
-    unlink(temp)
-  }
-  
-  
-}
 
