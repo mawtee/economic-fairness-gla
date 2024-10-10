@@ -1,8 +1,8 @@
-#'[Script]#'*process_apprenticeships_backseries.R*
+#'[Script]#'*indicators-2_2_6.R*
 #'[Project]#'*economic_fairness_gla (https://github.com/mawtee/economic-fairness-gla)*
 #'[Author]#'*M. Tibbles*
 #'[Last Update]#'*08/10/2024*
-#'[Description]#'*Defines all processing functions used for indicator 2_2_6-apprenticeships*
+#'[Description]#'*blah*
 #'[____________________________________________________________________________]
 
 # Starts London versus Rest of England (2_2_6_a)

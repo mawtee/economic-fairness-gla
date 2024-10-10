@@ -13,13 +13,13 @@ library(DatawRappr)
 library(openxlsx)
 #'[Source Paths]
 source('scripts/helpers.R')
-source('scripts/processing/2_2_6-apprenticeships/process-apprenticeships.R') # add this within if condition so that only plays where reprocess = T
+source('scripts/processing/2_2_6-apprenticeships/process-2_2_6.R') # add this within if condition so that only plays where reprocess = T
 #'[Global Options]
 #' Backseries inputs 
 #' Note. Unless you have a clear reason to update the back series, skip this step,* (`PROCESS_BACKSERIES <- F`)
 REPROCESS_BACKSERIES <- T
 if (REPROCESS_BACKSERIES==TRUE) {
-  source('scripts/processing/2_2_6-apprenticeships/process-apprenticeships-backseries.R')
+  source('scripts/processing/2_2_6-apprenticeships/process-backseries-2_2_6.R')
   BACKSERIES__APP_0516_NAMES <- c('z-2_2_6-backseries-starts-0516.csv', 'z-2_2_6-backseries-achievements-0516.csv')
   BACKSERIES__POP_0516_NAME <- 'z-population-data-la-nomis-0516.xlsx'
   BACKSERIES__CURR_YEAR <- as.numeric(format(Sys.time(),"%Y")) -1 # Remove if 

@@ -4,4 +4,4 @@ renv::install(
   "munichrocker/DatawRappr"
 )
 renv::snapshot()
-renv::restore()
+#renv::restore()

@@ -1,8 +1,8 @@
-#'[Script]#'*process_apprenticeships.R*
+#'[Script]#'*process-2_2_2_6.R*
 #'[Project]#'*economic_fairness_gla (https://github.com/mawtee/economic-fairness-gla)*
 #'[Author]#'*M. Tibbles*
 #'[Last Update]#'*02/10/2024*
-#'[Description]#'*This 
+#'[Description]#'*This blah *
 #'[____________________________________________________________________________]
 
 
