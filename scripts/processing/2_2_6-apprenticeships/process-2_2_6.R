@@ -94,8 +94,8 @@ load_and_clean_raw_app_data <- function(raw_path, data_year) {
       time_period = paste(substr(as.character(time_period), 1,4), substr(as.character(time_period), 5,6), sep="/"),
       population = as.numeric(as.character(population))
     ) %>%
-    select(time_period, data_year, region_name, population, starts, achievements, starts_rate_per_100000_population,  achievements_rate_per_100000_population) %>%
-    mutate(across(c(starts, achievements, contains('rate')), ~as.numeric(as.character(.x))))
+    select(time_period, data_year, region_name, population, starts, achievements) %>%
+    mutate(across(c(starts, achievements), ~as.numeric(as.character(.x))))
   return(df_app_processed) 
 }
 

@@ -58,9 +58,8 @@ process_app_backseries_0516 <- function(app_names, pop_name) {
   # Add population estimates to apprenticeships data and generate rates
   df_app_rate <-
     left_join(df_app, df_pop, by=c('region_name', 'year'))  %>%
-    mutate(across(c(starts, achievements),~ round((.x/population)*100000,0), .names='{.col}_rate_per_100000_population')) %>%
     mutate(year = year+1) %>% #  Adjust year variable to reflect latter year, and therefore data_year (the data_year variable is redundant for this back series, but relevant to the latter portion, since it indicates what series a given year is taken from - ik it's a bit messy here, my bad!)
-    select(time_period, 'data_year'='year', region_name, population, starts, achievements, starts_rate_per_100000_population, achievements_rate_per_100000_population)
+    select(time_period, 'data_year'='year', region_name, population, starts, achievements)
   
   return(df_app_rate)
 

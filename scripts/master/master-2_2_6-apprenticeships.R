@@ -17,8 +17,8 @@ source('scripts/processing/2_2_6-apprenticeships/process-2_2_6.R') # add this wi
 #'[Global Options]
 #' Backseries inputs 
 #' Note. Unless you have a clear reason to update the back series, skip this step,* (`PROCESS_BACKSERIES <- F`)
-REPROCESS_BACKSERIES <- T
-if (REPROCESS_BACKSERIES==TRUE) {
+BACKSERIES <- T
+if (BACKSERIES==TRUE) {
   source('scripts/processing/2_2_6-apprenticeships/process-backseries-2_2_6.R')
   BACKSERIES__APP_0516_NAMES <- c('z-2_2_6-backseries-starts-0516.csv', 'z-2_2_6-backseries-achievements-0516.csv')
   BACKSERIES__POP_0516_NAME <- 'z-population-data-la-nomis-0516.xlsx'
@@ -28,8 +28,9 @@ if (REPROCESS_BACKSERIES==TRUE) {
   BACKSERIES__PROCESSED_SUFFIX <- '' 
 }
 #' Update series inputs
-UPDATE_SERIES <- TRUE
-  if (UPDATE_SERIES==T) {
+UPDATE <- TRUE
+  if (UPDATE==T) {
+    source('scripts/indicators/2_2_6-apprenticeships/indicators-2_2_6.R')
     UPDATE__URL <- 'https://explore-education-statistics.service.gov.uk/find-statistics/apprenticeships'
     UPDATE__YEAR <- as.numeric(format(Sys.time(),"%Y"))
     UPDATE__RELEASE_YEAR <- paste0(UPDATE__YEAR-1,'_', substr(UPDATE__YEAR, 3,4))
@@ -37,14 +38,14 @@ UPDATE_SERIES <- TRUE
     UPDATE__RAW_PATH <- "data/raw-data/2_2_6-apprenticeships"
     UPDATE__PROCESSED_PATH <- "data/processed-data/2_2_6-apprenticeships"
     UPDATE__SERIES_PATH <- paste0(UPDATE__PROCESSED_PATH,'/', UPDATE__RELEASE_YEAR)
-    UPDATE_INDICATOR_A <- TRUE
-    UPDATE_INDICATOR_B <- TRUE
+    #UPDATE__DW
+    #UPDATE__DW_ID
 }
 
 #'[____________________________________________________________________________]
 
 
-# 0. Reprocess backseries
+# Reprocess backseries
 #===============================================================================
 
 #'* Unless you have a clear reason to update the back series, skip this step,* (`PROCESS_BACKSERIES <- F`)
@@ -53,7 +54,7 @@ UPDATE_SERIES <- TRUE
 #'* Additionally, reprocessing procedure will break if you execute it AFTER scraping and writing latest data via scrape_and_write_app_data() *
 #'* In the above scenario, remove the*`-1`* condition from global*`BACKSERIES__CURR_YEAR`* and then reprocessing will run successfully, with the latest data included*
 
-if (REPROCESS_BACKSERIES==T) {
+if (BACKSERIES==T) {
   
   
   # Reprocess original backseries (2005/6-2016/17)
@@ -71,7 +72,8 @@ if (REPROCESS_BACKSERIES==T) {
     user_confirm <- readline(
       "Are you sure you want to write reprocssed data to file?\n
        It is recommended that you define BACKSERIES__PROCESSED_SUFFIX so as not to overwrite existing backseries until you have checked that everything is in order.\n
-      (y/n)"
+      (y/n)
+      "
     )
     if (user_confirm=='y') {
       print('Writing backseries to file.')
@@ -100,21 +102,23 @@ if (REPROCESS_BACKSERIES==T) {
 }
 
 
-# 1. Update series with latest data
+# Update series with latest data 
 #===============================================================================
 
+if (UPDATE==T) {
+  
 
-# Scrape and save latest data
-scrape_and_write_app_data(UPDATE__URL, UPDATE__RELEASE_YEAR)
+  # Scrape and save latest data
+  scrape_and_write_app_data(UPDATE__URL, UPDATE__RELEASE_YEAR)
 
-# Process/clean latest data
-df_update <- load_and_clean_raw_app_data(paste0(UPDATE__RAW_PATH,'/', UPDATE__RELEASE_YEAR), UPDATE__YEAR)
+  # Process/clean latest data
+  df_update <- load_and_clean_raw_app_data(paste0(UPDATE__RAW_PATH,'/', UPDATE__RELEASE_YEAR), UPDATE__YEAR)
 
-# Add latest data to existing series (and overwrite series where applicable)
-df_update_series <- add_update_to_series(paste0(UPDATE__PROCESSED_PATH,'/', UPDATE__CURR_RELEASE_YEAR), df_update)
+  # Add latest data to existing series (and overwrite series where applicable)
+  df_update_series <- add_update_to_series(paste0(UPDATE__PROCESSED_PATH,'/', UPDATE__CURR_RELEASE_YEAR), df_update)
 
-# QA report of series provenance
-for (period in sort(unique(df_update_series$time_period))) {
+  # QA report of series provenance
+  for (period in sort(unique(df_update_series$time_period))) {
   if (period == sort(unique(df_update_series$time_period))[1]) {
     cat('Use the following output to conduct a review of the update process.\n
       A successul update should result in the last 6 years using data from the update year (',UPDATE__YEAR,')\n
@@ -126,9 +130,9 @@ for (period in sort(unique(df_update_series$time_period))) {
   print(paste0('  Data for time period ',period,' is from the data year ', data_year))
   
 }
-user_confirm <- readline('Confirm that you are satisfied with the data provenance of the full series.(y/n)')
-# Proceed to writing new series to file
-if (user_confirm=='y') {
+  user_confirm <- readline('Confirm that you are satisfied with the data provenance of the full series.(y/n)')
+  # Proceed to writing new series to file
+  if (user_confirm=='y') {
   if (length(unique(df_update_series$time_period))*length(unique(df_update_series$region_name)) == nrow(df_update_series)) {
     cat(
       'Series has no gaps, and all additional QA checks have been satisfied.\n
@@ -146,10 +150,17 @@ if (user_confirm=='y') {
     )
   }
 }
-if (user_confirm=='n') {
+  if (user_confirm=='n') {
   stop(
     'Aborting update procedure: You have confirmed that you are satisfied with the data provenance of the series. A thorough QA check is advised! '
   )
+  }
+  
+  #generate_indicator_226a()
+  #generate_indicator_226b()
+  
+  
+  
 }
 
 
