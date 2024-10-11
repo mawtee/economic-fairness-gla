@@ -133,7 +133,7 @@ if (UPDATE==T) {
     data_year <- unique(df_update_series$data_year[df_update_series$time_period==period])
     print(paste0('  Data for time period ',period,' is from the data year ', data_year))
   }
-  user_confirm <- readline('Confirm that you are satisfied with the data provenance of the full series.(y/n)')
+  user_confirm <- readline('Confirm that you have review and are satisfied with the data provenance of the full series.(y/n)')
   # Proceed to writing new series to file
   if (user_confirm=='y') {
     if (length(unique(df_update_series$time_period))*length(unique(df_update_series$region_name)) == nrow(df_update_series)) {
