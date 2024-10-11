@@ -27,14 +27,15 @@ process_app_backseries_0516 <- function(app_names, pop_name) {
   #' @return `df_app rate` Processed partial (2005/06-2016/17) backseries, ready for merging with later data
   #' 
   #' @noRd
-
+  print("Reprocessing backseries for 2005/07-2016/17")
+  
   
   # Load, clean and reshape apprenticeships backseries data
   df_app_list <- lapply(
     app_names, function(file) {
       metric <- str_extract(file, c('starts','achievements'))[!is.na(str_extract(file, c('starts','achievements')))]
       tempdf <-
-        read_csv(paste0('data/raw-data/2_2_6-apprenticeships/',file)) %>%
+        read_csv(paste0('data/raw-data/2_2_6-apprenticeships/',file), show_col_types=FALSE) %>%
         pivot_longer(!Region, names_to='year', values_to=metric) %>%
         rename(
           'region_name'='Region',
@@ -70,7 +71,7 @@ process_app_backseries_0516 <- function(app_names, pop_name) {
 process_app_backseries_17toCURR <- function(dirs, curr_year) {
   
   #' @description 
-  #' Processes back series data from 2017 to current year.
+  #' Processes back series data from 2017/18 to current year.
   #' 
   #' @details  relies on function load_and_clean_raw_app_data, functionis is designed to be run prior to download of latest data. 
   #' For example, reprocessing up to 2022/23 breaks if I execute procedure when 2023 data is already downloaded.
@@ -82,6 +83,7 @@ process_app_backseries_17toCURR <- function(dirs, curr_year) {
   #' @return `df_clean` Processed partial (2017/18-current)backseries, ready for merging with later data
   #' 
   #' @noRd
+  print(paste0("Reprocessing backseries for 2017/18-",curr_year-1,"/",curr_year-2000))
   
   
   # Do the following if latest backseries year is equal to curr_year (e.g. for 2022/23, 2023==2023)
@@ -120,20 +122,20 @@ process_app_backseries_17toCURR <- function(dirs, curr_year) {
     
     # Return error if duplicates still exist
     else {
-      stop(
-        'Reprocessed dataframe contains duplicates values by year-region_name.\n
-         Use debug function `browser()` at line 145 to identify "problem" years '
-      )
+      stop(paste0(
+        str_trim("Reprocessed dataframe contains duplicates values by year-region_name."),"\n",
+        str_trim("Use debug function `browser()` at line 145 to identify problem years.")
+      ))
     }
   }
   
   # Return error if latest backseries year does not equal curr_year
   else {
-    stop(
-      'Latest year in backseries data does not match latest year in global option.\n 
-       Check that global option `BACKSERIES__CURR_YEAR` is correctly specified.\n
-       Otherwise ensure that data for `BACKSERIES__CURR_YEAR` has already been processed and that files exist'
-    )
+    stop(paste0(
+      str_trim("Latest year in backseries data does not match latest year in global option."),"\n", 
+       str_trim("Check that global option `BACKSERIES__CURR_YEAR` is correctly specified."), "\n",
+       str_trim("Otherwise ensure that data for `BACKSERIES__CURR_YEAR` has already been processed and that files exist")
+    ))
   }
 
 }
