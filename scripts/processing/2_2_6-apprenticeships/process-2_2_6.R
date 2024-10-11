@@ -35,10 +35,10 @@ scrape_and_write_app_data <- function(url, release_year) {
   # Download and unzip
   temp <- tempfile()
   download.file(url=link, temp, mode = "wb")
-  if (dir.exists(paste0('data/raw-data/2_2_6-apprenticeships/batch-', release_year))) {
+  if (dir.exists(paste0('data/raw-data/2_2_6-apprenticeships/', release_year))) {
     user_confirm <- readline("Directory for data update already exists. Are you sure you want to overwrite the existing directory? (y/n)")
     if (user_confirm=='y') {
-      unzip(zipfile=temp, exdir=paste0('data/raw-data/2_2_6-apprenticeships/batch-', release_year), overwrite=TRUE)
+      unzip(zipfile=temp, exdir=paste0('data/raw-data/2_2_6-apprenticeships/', release_year), overwrite=TRUE)
       unlink(temp)
     }
     else {
