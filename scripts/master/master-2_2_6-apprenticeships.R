@@ -17,16 +17,16 @@ source('scripts/processing/2_2_6-apprenticeships/process-2_2_6.R')
 #'[Global Options]
 #' Backseries inputs 
 #' Note. Unless you have a clear reason to update the back series, skip this step,* (`PROCESS_BACKSERIES <- F`)
-BACKSERIES <- T
-if (BACKSERIES==TRUE) {
-  source('scripts/processing/2_2_6-apprenticeships/process-backseries-2_2_6.R')
-  BACKSERIES__APP_0516_NAMES <- c('z-2_2_6-backseries-starts-0516.csv', 'z-2_2_6-backseries-achievements-0516.csv')
-  BACKSERIES__POP_0516_NAME <- 'z-population-data-la-nomis-0516.xlsx'
-  BACKSERIES__CURR_YEAR <- as.numeric(format(Sys.time(),"%Y")) -1 
-  BACKSERIES__17toCURR_DIRS <- list.dirs(paste0('data/raw-data/2_2_6-apprenticeships'), recursive=F)
-  BACKSERIES__PROCESSED_PATH <- paste0('data/processed-data/2_2_6-apprenticeships/',BACKSERIES__CURR_YEAR-1,'_',substr(BACKSERIES__CURR_YEAR ,3,4))
-  BACKSERIES__PROCESSED_SUFFIX <- '' 
-}
+# BACKSERIES <- T
+# if (BACKSERIES==TRUE) {
+#   source('scripts/processing/2_2_6-apprenticeships/process-backseries-2_2_6.R')
+#   BACKSERIES__APP_0516_NAMES <- c('z-2_2_6-backseries-starts-0516.csv', 'z-2_2_6-backseries-achievements-0516.csv')
+#   BACKSERIES__POP_0516_NAME <- 'z-population-data-la-nomis-0516.xlsx'
+#   BACKSERIES__CURR_YEAR <- as.numeric(format(Sys.time(),"%Y")) -1 
+#   BACKSERIES__17toCURR_DIRS <- list.dirs(paste0('data/raw-data/2_2_6-apprenticeships'), recursive=F)
+#   BACKSERIES__PROCESSED_PATH <- paste0('data/processed-data/2_2_6-apprenticeships/',BACKSERIES__CURR_YEAR-1,'_',substr(BACKSERIES__CURR_YEAR ,3,4))
+#   BACKSERIES__PROCESSED_SUFFIX <- '' 
+# }
 #' Update series inputs
 UPDATE <- TRUE
   if (UPDATE==T) {
@@ -34,7 +34,7 @@ UPDATE <- TRUE
     UPDATE__URL <- 'https://explore-education-statistics.service.gov.uk/find-statistics/apprenticeships'
     UPDATE__YEAR <- as.numeric(format(Sys.time(),"%Y"))
     UPDATE__RELEASE_YEAR <- paste0(UPDATE__YEAR-1,'_', substr(UPDATE__YEAR, 3,4))
-    UPDATE__CURR_RELEASE_YEAR <- paste0(UPDATE__YEAR-2,'_', substr(UPDATE__YEAR-1, 3,4))
+    UPDATE__CURR_RELEASE_YEAR <- paste0(UPDATE__YEAR-2,'_', substr(UPDATE__YEAR-1, 3,4)) # year of previous release
     UPDATE__RAW_PATH <- "data/raw-data/2_2_6-apprenticeships"
     UPDATE__PROCESSED_PATH <- "data/processed-data/2_2_6-apprenticeships"
     UPDATE__SERIES_PATH <- paste0(UPDATE__PROCESSED_PATH,'/', UPDATE__RELEASE_YEAR)
