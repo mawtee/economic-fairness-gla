@@ -27,7 +27,6 @@ process_roughsleep_backseries_0522 <- function(name) {
   #' @noRd
   print("Reprocessing backseries from 2005/06-2022/23 ")
   
-  name <- 'z-3_2_5_a-backseries.csv'
   df <- read_csv(paste0("data/raw-data/3_2_5_a-roughsleep/", name))
   df$Year <- gsub('_', '/',paste0('20',df$Year))
   names(df) <- c('time_period', 'num_roughsleep')
