@@ -51,7 +51,7 @@ generate_indicator_226a <- function(series_path, release_year, dw, dw_id=NULL) {
       user_input <- readline(paste0(
         str_trim("A copy of this chart using the updated data has been created and sent to Datawrapper."),"\n",
         str_trim("Log in to Datawrapper to review the chart, which can be found in the economic fairness folder under ID"), clone[[1]]$publicId,"\n",
-        str_trim("Confirm that the you are satisfied with the updated output.(y/n)")
+        str_trim("Confirm that you have viewed are are satisfied with the updated output.(y/n)")
       ))
       # 
       if (user_input=='y') {
@@ -88,11 +88,13 @@ generate_indicator_226a <- function(series_path, release_year, dw, dw_id=NULL) {
   ))
   # if does not exist, create workbook
   wb <- loadWorkbook(
-    paste0('C:/Users/Matt/Documents/economic-fairness-gla/data/master-data/economc_fairness_master_',release_year,'.xlsx')
+    paste0('data/master-data/economc_fairness_master_',release_year,'.xlsx')
   )
-  addWorksheet(wb, '2_2_6_a')
+  if ('2_2_6_a' %ni% names(wb)) {
+    addWorksheet(wb, '2_2_6_a')
+  }
   writeData(wb, sheet = "2_2_6_a", df_ind, colNames = T)
-  saveWorkbook(wb,paste0('C:/Users/Matt/Documents/economic-fairness-gla/data/master-data/economc_fairness_master_',release_year,'.xlsx'),overwrite = T)
+  saveWorkbook(wb,paste0('data/master-data/economc_fairness_master_',release_year,'.xlsx'),overwrite = T)
 }
 
 
@@ -140,7 +142,7 @@ generate_indicator_226b <- function(series_path, release_year, dw, dw_id=NULL) {
       user_input <- readline(paste0(
         str_trim("A copy of this chart using the updated data has been created and sent to Datawrapper."),"\n",
         str_trim("Log in to Datawrapper to review the chart, which can be found in the economic fairness folder under ID"), clone[[1]]$publicId,"\n",
-        str_trim("Confirm that the you are satisfied with the updated output.(y/n)")
+        str_trim("Confirm that you have viewed are are satisfied with the updated output.(y/n)")
       ))
       # 
       if (user_input=='y') {
@@ -177,9 +179,11 @@ generate_indicator_226b <- function(series_path, release_year, dw, dw_id=NULL) {
   ))
   # if does not exist, create workbook
   wb <- loadWorkbook(
-    paste0('C:/Users/Matt/Documents/economic-fairness-gla/data/master-data/economc_fairness_master_',release_year,'.xlsx')
+    paste0('data/master-data/economc_fairness_master_',release_year,'.xlsx')
   )
-  addWorksheet(wb, '2_2_6_b')
+  if ('2_2_6_b' %ni% names(wb)) {
+    addWorksheet(wb, '2_2_6_b')
+  }
   writeData(wb, sheet = "2_2_6_b", df_ind, colNames = T)
-  saveWorkbook(wb,paste0('C:/Users/Matt/Documents/economic-fairness-gla/data/master-data/economc_fairness_master_',release_year,'.xlsx'),overwrite = T)
+  saveWorkbook(wb,paste0('data/master-data/economc_fairness_master_',release_year,'.xlsx'),overwrite = T)
 }

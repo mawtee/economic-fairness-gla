@@ -143,6 +143,7 @@ if (UPDATE==T) {
         dir.create(UPDATE__SERIES_PATH)
       }
       write_csv(df_update_series, paste0(UPDATE__SERIES_PATH,'/2_2_6-processed.csv'))
+      print(paste0("Updated series saved to '", UPDATE__SERIES_PATH,"/2_2_6-processed.csv'"))
     }
     else {
       stop(paste0(
