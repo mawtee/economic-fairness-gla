@@ -65,7 +65,7 @@ load_and_clean_raw_app_data <- function(raw_path, data_year) {
   #' @details 
   #' Raw apprenticeships data is loaded; columns renamed; regional filter applied and redundant variable dropped
   #'
-  #' @param path description
+  #' @param raw_path description
   #' @param data_year description
   #'
   #' @return `df_app_processed` Cleaned dataframe
@@ -123,7 +123,7 @@ add_update_to_series <- function(processed_path, df_update) {
   df <- bind_rows(df_series, df_update)
   
   # Loop through each value of time_period and keep most recent record of time_period 
-  # Note. This results in the elimination of duplicates
+  # Note. This results in the elimination of year duplicates - DW!!!
   df_clean_list <- lapply(
     sort(unique(df$time_period)), function(y) {
       last_occurence <- max(df$data_year[which(df$time_period==y)])
