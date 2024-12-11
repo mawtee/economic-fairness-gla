@@ -10,6 +10,7 @@ library(tidyverse)
 library(readxl)
 library(rvest)
 library(openxlsx)
+library(readODS)
 library(DatawRappr)
 #'[Helper Functions]
 source('scripts/helpers.R')
@@ -36,11 +37,10 @@ if (UPDATE==T) {
   UPDATE__RAW_PATH <- paste0("data/raw-data/",UPDATE__CODE,"-roughsleep")
   UPDATE__PROCESSED_PATH <- sub('raw-data', 'processed-data', UPDATE__RAW_PATH)
   UPDATE__SERIES_PATH <- paste0(UPDATE__PROCESSED_PATH,'/', UPDATE__RELEASE_YEAR)
-  #source('scripts/indicators/2_2_6-apprenticeships/indicators-2_2_6.R')
-  # UPDATE__DW_A <- T
-  # UPDATE__DW_A_ID <- 'ZbznR'
-  # UPDATE__DW_B <- T
-  # UPDATE__DW_B_ID <- 'EnQ4V'
+  source('scripts/indicators/3_2_5_a-roughsleep/indicators-3_2_5_a.R')
+  UPDATE__DW <- T
+  UPDATE__DW_ID <- '9inJd'
+
 }
 
 
@@ -158,9 +158,8 @@ if (UPDATE==T) {
     )
   }
   
-  # TODO wirte and add indicator functions
-  
-  
+  # Generate indicator (updating)
+  generate_indicator_325a(UPDATE__SERIES_PATH, UPDATE__RELEASE_YEAR, UPDATE__DW, UPDATE__DW_ID)
   
 }
   
