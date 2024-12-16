@@ -74,8 +74,8 @@ load_and_clean_raw_chain_data <- function(raw_path, data_year) {
   #' 
   #' @noRd
   
-  raw_path <- paste0(UPDATE__RAW_PATH,'/', UPDATE__RELEASE_YEAR)
-  data_year <- UPDATE__YEAR
+  #raw_path <- paste0(UPDATE__RAW_PATH,'/', UPDATE__RELEASE_YEAR)
+  #data_year <- UPDATE__YEAR
   print(paste0("Loading and cleaning raw CHAIN (rough sleeping) data for ", data_year-1,"/",data_year-2000))
   
   # Find geography-population file path (where path is not full CSV path e.g. in the UPDATE__RAW_PATH global)
