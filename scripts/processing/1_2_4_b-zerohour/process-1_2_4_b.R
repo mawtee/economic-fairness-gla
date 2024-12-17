@@ -99,7 +99,7 @@ load_and_clean_raw_zerohourgeo_data <- function(raw_path, data_year) {
   # Remove superfluous rows and flag_names column from df
   df <- df[begin:end, -ncol(df)]
   # Rename df columns with new names
-  names(df)[1:ncol(df)] <- c('time_period', names(names)[-1])
+  names(df)[1:ncol(df)] <- c('time_period', names(names_df)[-1])
   
   
   # Generated clean df

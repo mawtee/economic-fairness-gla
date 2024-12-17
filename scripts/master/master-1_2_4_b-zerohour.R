@@ -119,48 +119,62 @@ if (UPDATE==T) {
   # Add latest data to existing series (and overwrite series where applicable)
   df_update_series <- add_update_to_series(paste0(UPDATE__PROCESSED_PATH,'/', UPDATE__CURR_RELEASE_YEAR), UPDATE__CODE, df_update)
   
-  # QA report of series provenance
-  # Note. There is some gap in the series!!!!
-  # TODO Write appropirate QA check
-  for (period in sort(unique(df_update_series$time_period))) {
-    if (period == sort(unique(df_update_series$time_period))[1]) {
-      cat(paste0(
-        str_trim("Use the following output to conduct a review of the update process."),"\n",
-        str_trim("As of 2024, a successul update should result in the last 5 years using data from the update year ("),UPDATE__YEAR,")","\n",
-        str_trim("Divergence from this standard may mean that the CHAIN publication has been amended to include a longer or shorter time series."),"\n",
-        str_trim("This program should be able to deal with such change, but nevertheless a thorough QA check is advised in the above scenario."),"\n",
-        str_trim("Also, note that the below output for 2018/19 and before is largely meaningless given the data is collected from GLA network drive; what matters is the data provenance from 2019/20 onward"),"\n"
-      ))
+  # Not sure a QA check is really needed, maybe just check series is biannual up to Q4 2019, then quartery from Q1 202 onward
+  cat(paste0(
+    str_trim("Use the following output to conduct a review of the update process in terms of the length of the series by year"),"\n",
+    str_trim("The expected length of each year is based on the series length from previous releases."),"\n",
+    str_trim("Divergence between expected and actual length should be carefully investigated before proceeding. "),"\n"
+  ))
+  for (period in unique(as.numeric(substr(df_update_series$time_period, 1, 4)))) {
+    if (period == 2013) {
+      exp_length <- 1
     }
-    data_year <- unique(df_update_series$data_year[df_update_series$time_period==period])
+    else if (between(period, 2014, 2019)) {
+      exp_length <- 2
+    }
+    else if (between(period, 2020, UPDATE__YEAR-1)) {
+      exp_length <- 4
+    }
+    else {
+      exp_length <- 3 # Assuming an update in November
+    }
+    act_length <- length(unique(df_update_series$time_period[grepl(as.character(period), df_update_series$time_period)]))
+    print(paste0('  Data for time period ',period,' is recorded at ',act_length,' time points: Data for ',period,' should be recorded at ',exp_length,' time points.'  ))
+  }
+  # Also QA check on data provenance
+  # QA report of series provenance
+  cat(paste0(
+    str_trim("As of 2024, a successul update should result in all years using data from update year ("),UPDATE__YEAR,")","\n",
+    str_trim("Divergence from this standard may mean that the ONS publication has been such that some of the earlier years have now been dropped from the time series."),"\n",
+    str_trim("This program should be able to deal with such change using data from a previous release, but nevertheless a thorough QA check is advised in the above scenario."),"\n"
+  ))
+  for (period in unique(as.numeric(substr(df_update_series$time_period, 1, 4)))) {
+    data_year <- unique(df_update_series$data_year[as.numeric(substr(df_update_series$time_period, 1, 4))==period])
     print(paste0('  Data for time period ',period,' is from the data year ', data_year))
   }
-  user_confirm <- readline('Confirm that you have review and are satisfied with the data provenance of the full series.(y/n)')
+  
+  user_confirm <- readline('Confirm that you have reviewed and are satisfied with the length and provenance of the series.(y/n)')
+  
   # Proceed to writing new series to file
   if (user_confirm=='y') {
-    if (length(unique(df_update_series$time_period)) == length(2006:UPDATE__YEAR)) {
-      cat(paste0(
-        str_trim("Series has no gaps, and all additional QA checks have been satisfied."),"\n",
-        str_trim("Creating new directory and writing updated series to file.")
-      ))
+    cat(paste0(
+      str_trim("QA checks have been satisfied."),"\n",
+      str_trim("Creating new directory and writing updated series to file.")
+    ))
       if (!dir.exists(UPDATE__SERIES_PATH)) {
         dir.create(UPDATE__SERIES_PATH)
       }
       write_csv(df_update_series, paste0(UPDATE__SERIES_PATH,'/1_2_4_b-processed.csv'))
       print(paste0("Updated series saved to '", UPDATE__SERIES_PATH,"/1_2_4_b-processed.csv'"))
-    }
-    else {
-      stop(paste0(
-        str_trim("Series contains gaps."),"\n",
-        str_trim("Investigate source of series gaps/break before continuing, noting that one possibility is genuine gaps in the most recent data.")
-      ))
-    }
   }
   if (user_confirm=='n') {
     stop(
       'Aborting update procedure: You have confirmed that you are satisfied with the data provenance of the series. A thorough QA check is advised! '
     )
   }
+  
+  # Generate indicator (updating)
+  generate_indicator_325a(UPDATE__SERIES_PATH, UPDATE__RELEASE_YEAR, UPDATE__DW, UPDATE__DW_ID)
   
   
 }
