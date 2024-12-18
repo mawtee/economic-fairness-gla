@@ -39,7 +39,7 @@ if (UPDATE==T) {
   UPDATE__SERIES_PATH <- paste0(UPDATE__PROCESSED_PATH,'/', UPDATE__RELEASE_YEAR)
   source('scripts/indicators/1_2_4_b-zerohour/indicators-1_2_4_b.R')
   UPDATE__DW <- T
-  UPDATE__DW_ID <- '9inJd'
+  UPDATE__DW_ID <- '9YZTc'
   
 }
 
@@ -54,6 +54,9 @@ if (UPDATE==T) {
 #'* Additionally, reprocessing procedure will break if you execute it AFTER scraping and writing latest data via scrape_and_write_app_data() *
 #'* In the above scenario, remove the*`-1`* condition from global*`BACKSERIES__CURR_YEAR`* and then reprocessing will run successfully, with the latest data included*
 #'* But, to reiterate, if you do not have a clear reason (and curiosity is not a reason) to reprocess the backseries, then SKIP THIS STEP*
+#'* Also note that as of 2024, the published data tables include the full series stretching back to 2013, effectively making this process superfluous*
+#'* It is, however, possible, that future revisions to the published tables will result in earlier year being excluded from the series *
+#'* Under these conditions, this reprocessing procedure will hold some values in terms of reproducing the full series *
 
 
 if (BACKSERIES==T) {
@@ -174,9 +177,11 @@ if (UPDATE==T) {
   }
   
   # Generate indicator (updating)
-  generate_indicator_325a(UPDATE__SERIES_PATH, UPDATE__RELEASE_YEAR, UPDATE__DW, UPDATE__DW_ID)
+  generate_indicator_124b(UPDATE__SERIES_PATH, UPDATE__RELEASE_YEAR, UPDATE__DW, UPDATE__DW_ID)
   
   
 }
+
+
 
 

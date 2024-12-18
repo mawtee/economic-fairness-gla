@@ -1,37 +1,36 @@
-#'[Script]#'*indicators-3_2_5_a.R*
+#'[Script]#'*indicators-1_2_4_b.R*
 #'[Project]#'*economic_fairness_gla (https://github.com/mawtee/economic-fairness-gla)*
 #'[Author]#'*M. Tibbles*
-#'[Last Update]#'*11/12/2024*
+#'[Last Update]#'*18/12/2024*
 #'[Description]#'*blah*
 #'[____________________________________________________________________________]
 
-# Number of rough sleepers in London (3_2_5_a)
+# Proportion of workers on zero hour contracts London vs UK (1_2_4_b)
 #===============================================================================
 
 
-generate_indicator_325a <- function(series_path, release_year, dw, dw_id=NULL) {
+generate_indicator_124b <- function(series_path, release_year, dw, dw_id=NULL) {
   
   
-  # series_path <- paste0(UPDATE__PROCESSED_PATH,'/', UPDATE__RELEASE_YEAR)
-  # release_year <- UPDATE__RELEASE_YEAR
-  # dw <- UPDATE__DW
-  # dw_id <- UPDATE__DW_ID
+  series_path <- paste0(UPDATE__PROCESSED_PATH,'/', UPDATE__RELEASE_YEAR)
+  release_year <- UPDATE__RELEASE_YEAR
+  dw <- UPDATE__DW
+  dw_id <- UPDATE__DW_ID
   
   cat(paste0(
     str_trim('=================================================================='),"\n",
-    str_trim('Generating indicator 3_2_5_a'),"\n",
+    str_trim('Generating indicator 1_2_4_b'),"\n",
     str_trim('=================================================================='),"\n"
   ))
   
   # Load series
-  df_ind <- read_csv(paste0(series_path, '/2_2_6-processed.csv'), show_col_types=FALSE) %>%
-    mutate(geography = 'London') %>%
-    relocate(geography, .before='num_roughsleep')
+  df_ind <- read_csv(paste0(series_path, '/1_2_4_b-processed.csv'), show_col_types=FALSE) %>%
+    mutate(across(c(london, uk),~ round(.x,1)))
   
   # Update data wrapper plot
   if (dw==T) {
     if (is.null(dw_id)) {
-      dw_id <- '9inJd'
+      dw_id <- '9YZTc'
     }
     # Test DW API
     key <- 'YFdh5P5bJcllD8leFsnnZMFB0wGberKn105tv5SJC0xAcCny6WTyunpzMSRt4bhc' 
@@ -82,9 +81,9 @@ generate_indicator_325a <- function(series_path, release_year, dw, dw_id=NULL) {
   wb <- loadWorkbook(
     paste0('data/master-data/economc_fairness_master_',release_year,'.xlsx')
   )
-  if ('3_2_5_a' %ni% names(wb)) {
-    addWorksheet(wb, '3_2_5_a')
+  if ('1_2_4_b' %ni% names(wb)) {
+    addWorksheet(wb, '1_2_4_b')
   }
-  writeData(wb, sheet = "3_2_5_a", df_ind, colNames = T)
+  writeData(wb, sheet = "1_2_4_b", df_ind, colNames = T)
   saveWorkbook(wb,paste0('data/master-data/economc_fairness_master_',release_year,'.xlsx'),overwrite = T)
 }
