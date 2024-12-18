@@ -1,7 +1,7 @@
 #'[Script]#'*process-backseries-1_2_4_b.R*
 #'[Project]#'*economic_fairness_gla (https://github.com/mawtee/economic-fairness-gla)*
 #'[Author]#'*M. Tibbles*
-#'[Last Update]#'*11/12/2024*
+#'[Last Update]#'*18/12/2024*
 #'[Description]#'*Defines function to process backseries data on rough sleeping from 2005/06-2022/23.*
 #'* Note that because this data is not part of an established/scrapeable series, I have reverted to constructing *
 #'* a minimal function that does the following only:*

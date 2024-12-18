@@ -1,7 +1,7 @@
 #'[Script]#'*master-1_2_4_b-zerohour.R*
 #'[Project]#'*economic_fairness_gla (https://github.com/mawtee/economic-fairness-gla)*
 #'[Author]#'*M. Tibbles*
-#'[Last Update]#'*11/12/2024*
+#'[Last Update]#'*18/12/2024*
 #'[Description]#'*Master script* 
 #'[Libraries]
 rm(list=ls())
